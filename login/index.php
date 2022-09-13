@@ -1,3 +1,10 @@
+<?php
+session_start();
+if(isset($_SESSION['username'])){
+	header('Location: ../app/');
+}
+require_once "../Connexion/db.php";
+?>
 <!DOCTYPE HTML>
 <html lang="fr">
 
@@ -49,13 +56,42 @@
 						<span class="fa fa-envelope"></span>
 					</div>
 					<div class="input">
-						<input type="password" placeholder="Mot de passe" name="password" required />
-						<span class="fa fa-unlock"></span>
+						<input type="password" placeholder="Mot de passe" name="mdp" required />
+						<span class="fa fa-lock"></span>
 					</div>
-					<button type="submit" class="btn submit">
+					<button type="submit" name="login" class="btn submit">
 						<span class="fa fa-sign-in"></span>
 					</button>
 				</form>
+
+				<?php 
+				if(isset($_POST['login']))
+				{
+					$email = strtolower(htmlspecialchars($_POST['email']));
+					$mdp = htmlspecialchars($_POST['mdp']);
+					$mdp_hash = md5($mdp);
+
+					//correct, on continue
+					$req = $pdo->query('SELECT username, nomcomplet, email, password_hash, photo_profil, idRoles_k FROM Utilisateurs WHERE (username = "'.$email.'" OR email = "'.$email.'") AND password_hash = "'.$mdp_hash.'"');
+					$res = $req->fetchAll(PDO::FETCH_OBJ);
+						if($res){
+							
+							echo "<b style='color: #0f0;'>Connexion effectué avec succès.</b><br />";
+							$_SESSION['username'] = $res[0]->username;
+							$_SESSION['nomcomplet'] = $res[0]->nomcomplet;
+							$_SESSION['email'] = $res[0]->email;
+							$_SESSION['photo_profil'] = $res[0]->photo_profil;
+							$_SESSION['idRoles_k'] = $res[0]->idRoles_k;
+
+							header('Location: ../');
+							
+						}else{
+							echo "<b style='color: #f44;'>Désolé ! le nom d'utilisateur, l'adresse mail ou le<br />mot de passe n'existe pas dans la base de données.</b><br />";
+						}
+					echo "<br />";
+				}
+				?>
+
 				Pas encore de compte? <a href="../register" class="bottom-text-w3ls">Créer un compte ici.</a> <br />
 				<a href="?password=reset" class="bottom-text-w3ls">Mot de passe oublié?</a>
 			</div>

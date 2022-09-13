@@ -1,3 +1,6 @@
+<?php
+require_once "../Connexion/db.php";
+?>
 <!DOCTYPE HTML>
 <html lang="fr">
 
@@ -42,6 +45,7 @@
 				<div class="top-content-style">
 					<img src="images/logo.png" width="80px" alt="" />
 				</div>
+				
 				<form action="#" method="post">
 					<p class="legend">S'inscrire<span class="fa fa-hand-o-down"></span></p>
 					<div class="input">
@@ -54,17 +58,55 @@
 					</div>
 					<div class="input">
 						<input type="password" placeholder="Mot de passe" name="password" required />
-						<span class="fa fa-unlock"></span>
+						<span class="fa fa-lock"></span>
 					</div>
 					<div class="input">
 						<input type="password" placeholder="Re-tapez le mot de passe" name="password2" required />
-						<span class="fa fa-unlock"></span>
+						<span class="fa fa-lock"></span>
 					</div>
-					<button type="submit" class="btn submit">
+					<button type="submit" name="register" class="btn submit">
 						<span class="fa fa-sign-in"></span>
 					</button>
 				</form>
+				
+				<?php 
+				if(isset($_POST['register']))
+				{
+					$username = strtolower(htmlspecialchars($_POST['username']));
+					$email = strtolower(htmlspecialchars($_POST['email']));
+					$password = htmlspecialchars($_POST['password']);
+					$password2 = htmlspecialchars($_POST['password2']);
+
+
+					if($password == $password2)
+					{
+						//correct, on continue
+						$req = $pdo->prepare("SELECT username, email FROM Utilisateurs WHERE username = ? OR email = ?");
+						$req->execute([$username, $email]);
+						$res = $req->fetchAll(PDO::FETCH_ASSOC);
+						if($res){
+							echo "<b style='color: #f44;'>Désolé ! le nom d'utilisateur ou l'adresse<br />mail existe déjà.</b><br />";
+						}else{
+							//correct, on continue
+							$hash_password = md5($password);
+							$date = date("Y-m-d H:i:s");
+							$roleId = 2;
+							$req1 = $pdo->exec('INSERT INTO Utilisateurs SET username = "'.$username.'", email = "'.$email.'", password_hash = "'.$hash_password.'", date_inscription = "'.$date.'", idRoles_k = "'.$roleId.'"');
+							
+							echo "<b style='color: #0f0;'>Inscription effectué avec succès.</b><br />";
+						}
+						
+					}else
+					{
+						echo "<b style='color: #f44;'>Erreur ! Mot de passe incorrect.</b><br />";
+					}
+
+					echo "<br />";
+				}
+				?>
+				
 				Déjà une compte? <a href="../login" class="bottom-text-w3ls">Se connecter par ici.</a> <br />
+				
 			</div>
 		</div>
 		<!-- //content -->

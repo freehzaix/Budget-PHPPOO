@@ -1,12 +1,11 @@
 <?php
 session_start();
 if(isset($_SESSION['username'])){
-    require 'autoloader.php'; 
-    Autoloader::register(); 
+    //require 'autoloader.php'; 
+    //Autoloader::register(); 
 
-    $user = new Utilisateurs("admmin", "admin@dev.test");
-
-    var_dump($user);
+    header('Location: app/');
+    
 }else{
     header('Location: login/');
 }
